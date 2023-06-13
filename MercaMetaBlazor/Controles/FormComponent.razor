@@ -1,0 +1,241 @@
+﻿@inject EmpresaService empresaService
+<div class="form-container">
+    <EditForm Model="empresa" class="mr-5" OnValidSubmit="CrearEmpresa" OnInvalidSubmit="Invalido">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <div class="row">
+            <div class="form-group col-6">
+                <label>Nit: </label>
+                <InputNumber @bind-Value="empresa.Nit" class="form-control" />
+                <ValidationMessage For="(()=>empresa.Nit)"></ValidationMessage>
+            </div>
+            <div class="form-group col-6">
+                <label>Nombre: </label>
+                <InputText @bind-Value="empresa.Nombre" class="form-control" />
+                <ValidationMessage For="(()=>empresa.Nombre)"></ValidationMessage>
+            </div>
+
+
+        </div>
+
+        <div class="row">
+            <div class="form-group col-6">
+                <label>Dirección: </label>
+                <InputText @bind-Value="empresa.Direccion" class="form-control" />
+                <ValidationMessage For="(()=>empresa.Direccion)"></ValidationMessage>
+            </div>
+            <div class="form-group col-6">
+                <label>Teléfono: </label>
+                <InputNumber @bind-Value="empresa.Telefono" class="form-control" />
+                <ValidationMessage For="(()=>empresa.Telefono)"></ValidationMessage>
+            </div>
+
+        </div>
+
+
+
+        <div class="row">
+            <div class="form-group col-6">
+                <label>Email: </label>
+                <InputText @bind-Value="empresa.Usuario" class="form-control" />
+                <ValidationMessage For="(()=>empresa.Usuario)"></ValidationMessage>
+            </div>
+            <div class="form-group col-6">
+                <label>Contraseña: </label>
+                <InputText type="password" @bind-Value="empresa.Password" class="form-control" />
+                <ValidationMessage For="(()=>empresa.Password)"></ValidationMessage>
+            </div>
+
+        </div>
+
+        <h6>Datos del representante legal</h6>
+
+        <div class="row">
+            <div class="form-group col-6">
+                <label>Identificación: </label>
+                <InputNumber @bind-Value="empresa.IdRepresentante" class="form-control" />
+                <ValidationMessage For="(()=>empresa.IdRepresentante)"></ValidationMessage>
+            </div>
+            <div class="form-group col-6">
+                <label>Nombre: </label>
+                <InputText @bind-Value="empresa.NombreRepresentante" class="form-control" />
+                <ValidationMessage For="(()=>empresa.NombreRepresentante)"></ValidationMessage>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="form-group col-6">
+                <label>Apellido: </label>
+                <InputText @bind-Value="empresa.ApellidoRepresentante" class="form-control" />
+                <ValidationMessage For="(()=>empresa.ApellidoRepresentante)"></ValidationMessage>
+            </div>
+            <div class="form-group col-6">
+                <label>Teléfono: </label>
+                <InputNumber @bind-Value="empresa.TelefonoRepresentante" class="form-control" />
+                <ValidationMessage For="(()=>empresa.TelefonoRepresentante)"></ValidationMessage>
+            </div>
+        </div>
+
+        <div class="form-group col-6">
+            <label>Dirección: </label>
+            <InputText @bind-Value="empresa.DireccionRepresentante" class="form-control" />
+            <ValidationMessage For="(()=>empresa.DireccionRepresentante)"></ValidationMessage>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-4">
+                <input type="submit" value="Guardar" class="btn btn-success" />
+            </div>
+        </div>
+        
+
+
+
+    </EditForm>
+
+
+    <div class="form-group">
+        <label>Imagen:</label>
+        <InputFile class="form-control mb-5" OnChange="HandleFileSelection" />
+        @if (imageData != null)
+        {
+            <img src="@($"data:image/png;base64,{Convert.ToBase64String(imageData)}")"  />
+        }
+
+    </div>
+
+</div>
+
+<div class="row mt-3">
+    <div class="col-4">
+        <button class="btn btn-primary" @onclick="EditarEmpresa">Editar</button>
+    </div>
+    <div class="col-4">
+        <button class="btn btn-danger" @onclick="EliminarEmpresa">Eliminar</button>
+    </div>
+</div>
+
+
+<ModalConfirmacion @ref="confirmacion"></ModalConfirmacion>
+<ModalEditarEmpresa @ref="modalEditarEmpresa" ConfirmarEvent="ConfirmarEdicionEmpresa"></ModalEditarEmpresa>
+<ModalEliminarEmpresa @ref="modalEliminarEmpresa" ConfirmarEvent="ConfirmarEliminacionEmpresa"></ModalEliminarEmpresa>
+
+
+@code {
+    EmpresaModelView empresa = new EmpresaModelView();
+    ModalConfirmacion confirmacion;
+    ModalEditarEmpresa modalEditarEmpresa;
+    ModalEliminarEmpresa modalEliminarEmpresa;
+    private byte[] imageData;
+
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer);
+        imageData = buffer;
+
+        if (file != null)
+        {
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            stream.Position = 0;
+            var buffer2 = stream.GetBuffer();
+            var clonedStream = new MemoryStream(buffer2, 0, buffer.Length, writable: true, publiclyVisible: true);
+            empresa.Imagen = new FormFile(clonedStream, 0, file.Size, file.Name, file.Name);
+        }
+    }
+
+    private void CrearEmpresa()
+    {
+        int filasEmpresa = empresaService.InsertarEmpresa(empresa);
+
+        if (filasEmpresa > 0)
+        {
+            confirmacion.Mensaje = "Se ha creado la empresa";
+            confirmacion.Mostrar();
+            empresa = new EmpresaModelView();
+            imageData = null;
+
+
+        }
+        else
+        {
+            confirmacion.Mensaje = "No ha creado la empresa";
+            confirmacion.Mostrar();
+
+
+        }   
+
+    }
+
+    private void EditarEmpresa()
+    {
+        var id = empresa.Nit;
+        if (empresa.Nit != 0)
+        {
+            modalEditarEmpresa.idEmpresa = empresa.Nit;
+            modalEditarEmpresa.Mostrar();
+
+        }
+    }
+
+    private void ConfirmarEdicionEmpresa()
+    {
+        if (modalEditarEmpresa.Resultado == 1)
+        {
+            confirmacion.Mensaje = "Se ha editato la empresa";
+
+        }
+        else
+        {
+            confirmacion.Mensaje = "No se ha editado la empresa";
+
+        }
+
+        confirmacion.Mostrar();
+
+    }
+
+    private void ConfirmarEliminacionEmpresa()
+    {
+
+        if (modalEliminarEmpresa.Resultado == 1)
+        {
+            confirmacion.Mensaje = "Se ha eliminado la empresa";
+
+        }
+        else
+        {
+            confirmacion.Mensaje = "No se ha eliminado la empresa";
+        
+        }
+
+        confirmacion.Mostrar();
+
+    }
+
+    private void EliminarEmpresa()
+    {
+        var id = empresa.Nit;
+        if (empresa.Nit != 0)
+        {
+            modalEliminarEmpresa.IdEmpresaAEliminar = empresa.Nit;
+            modalEliminarEmpresa.Mostrar();
+
+        }
+    
+    
+    }
+
+    private void Invalido()
+    {
+        
+        
+    
+    }
+
+ 
+
+}

@@ -1,0 +1,75 @@
+﻿@inject ProductoService productoService
+
+@if (Display)
+{
+    <div class="modal is-active">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Eliminar Empresa</p>
+                <button class="delete" aria-label="close"
+                    @onclick="Dispose"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="container">
+                    ¿Estas seguro de eliminar el producto?
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="btn btn-success mr-5" @onclick="EliminarProducto">Si</button>
+                <button class="btn btn-danger" @onclick="Dispose">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+}
+
+@code {
+    private bool Display = false;
+    public string IdProductoAEliminar { get; set; }
+    public int Resultado { get; set; }
+
+    [Parameter]
+    public EventCallback ConfirmarEvent { get; set; }
+
+    [Parameter]
+    public EventCallback RefrescarEvent { get; set; }
+
+    private void ConfirmarEliminacion()
+    {
+        ConfirmarEvent.InvokeAsync();
+
+    }
+
+    private void RefrescarProductos()
+    {
+        RefrescarEvent.InvokeAsync();
+
+    }
+
+    public void EliminarProducto()
+    {
+        Resultado = productoService.EliminarProducto(IdProductoAEliminar);
+
+        Dispose();
+        ConfirmarEliminacion();
+        RefrescarProductos();
+    }
+
+
+    public void Mostrar()
+    {
+        this.Display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Dispose()
+    {
+        this.Display = false;
+        StateHasChanged();
+
+    }
+
+}

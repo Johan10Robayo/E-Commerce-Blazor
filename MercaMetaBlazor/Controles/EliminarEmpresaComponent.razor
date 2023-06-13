@@ -1,0 +1,55 @@
+﻿@if (Display)
+{
+    <div class="modal is-active">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Eliminar Empresa</p>
+                <button class="delete" aria-label="close"
+                    @onclick="Close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="container">
+                    ¿Estas seguro de eliminar la empresa?
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" @onclick="EliminarEmpresa">Si</button>
+                <button class="button" @onclick="Close">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+}
+
+@code {
+    private bool Display = false;
+
+    [Parameter]
+    public EventCallback<int> PasarIdEmpresa { get; set; }
+
+
+    public void EliminarEmpresa()
+    {
+        
+
+    
+    }
+
+
+    public void Show()
+    {
+        this.Display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Close()
+    {
+        this.Display = false;
+        StateHasChanged();
+
+    }
+
+}

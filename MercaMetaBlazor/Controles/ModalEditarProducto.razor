@@ -1,0 +1,138 @@
+﻿@inject ProductoService productoService
+
+@if (Display)
+{
+    <div class="modal is-active">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Editar Producto</p>
+                <button class="delete" aria-label="close"
+                    @onclick="Close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="container">
+                    <EditForm Model="productoActual" OnValidSubmit="EditarProducto">
+                        <DataAnnotationsValidator></DataAnnotationsValidator>
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <label>Nombre:</label>
+                                <InputText @bind-Value="productoActual.Nombre" class="form-control" />
+                                <ValidationMessage For="(()=>productoActual.Nombre)" class="text-danger"></ValidationMessage>
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Precio:</label>
+                                <InputNumber @bind-Value="productoActual.Precio" class="form-control" />
+                                <ValidationMessage For="(()=>productoActual.Precio)" class="text-danger"></ValidationMessage>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descripcion:</label>
+                            <InputTextArea @bind-Value="productoActual.Descripcion" class="form-control"></InputTextArea>
+                            <ValidationMessage For="(()=>productoActual.Descripcion)" class="text-danger"></ValidationMessage>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Imagen</label>
+                            <InputFile OnChange="HandleFileSelected"  class="form-control" />
+                            
+                        </div>
+
+
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <label>Unidad de Medida:</label>
+                                <InputText @bind-Value="productoActual.UnidadMedida" class="form-control" />
+                                <ValidationMessage For="(()=>productoActual.UnidadMedida)" class="text-danger"></ValidationMessage>
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Cantidad:</label>
+                                <InputNumber @bind-Value="productoActual.Cantidad" class="form-control" />
+                                <ValidationMessage For="(()=>productoActual.Cantidad)" class="text-danger"></ValidationMessage>
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Editar</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button" @onclick="Close">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+}
+
+@code {
+    private bool Display = false;
+
+    [Parameter]
+    public EventCallback RefrescarEvent { get; set; }
+
+    [Parameter]
+    public EventCallback ConfirmacionEvent { get; set; }
+
+
+    public ProductoDto productoActual { get; set; } = new ProductoDto();
+    public int Resultado { get; set; }
+
+    private void ConfirmacionEditarProducto()
+    {
+        ConfirmacionEvent.InvokeAsync();
+
+    }
+
+    private void RefrescarProductos()
+    {
+        RefrescarEvent.InvokeAsync();
+
+    }
+
+    public void EditarProducto()
+    {
+        Resultado = productoService.ActualizarProducto(productoActual);
+        Close();
+        ConfirmacionEditarProducto();
+        RefrescarProductos();
+    }
+
+
+    public void Mostrar()
+    {
+        this.Display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Close()
+    {
+        this.Display = false;
+        StateHasChanged();
+
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            stream.Position = 0;
+            var buffer = stream.GetBuffer();
+            var clonedStream = new MemoryStream(buffer, 0, buffer.Length, writable: true, publiclyVisible: true);
+            productoActual.Imagen = new FormFile(clonedStream, 0, file.Size, file.Name, file.Name);
+
+            
+        }
+    }
+
+}
+

@@ -1,0 +1,108 @@
+﻿@inject PersonaService personaService
+
+@if (Display)
+{
+    <div class="modal is-active">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Editar Representante</p>
+                <button class="delete" aria-label="close"
+                    @onclick="Close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="container">
+                    <EditForm Model="personaActual" OnValidSubmit="EditarPersona">
+                        <DataAnnotationsValidator></DataAnnotationsValidator>
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <label>Identificación:</label>
+                                <InputNumber @bind-Value="personaActual.Id" class="form-control" />
+                                <ValidationMessage For="(()=>personaActual.Id)" class="text-danger"></ValidationMessage>
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Nombre:</label>
+                                <InputText @bind-Value="personaActual.Nombre" class="form-control" />
+                                <ValidationMessage For="(()=>personaActual.Nombre)" class="text-danger"></ValidationMessage>
+                            </div>
+                            
+                        </div>
+
+                     
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Apellido:</label>
+                                <InputText @bind-Value="personaActual.Apellido" class="form-control"></InputText>
+                                <ValidationMessage For="(()=>personaActual.Apellido)" class="text-danger"></ValidationMessage>
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Telefono:</label>
+                                <InputNumber @bind-Value="personaActual.Telefono" class="form-control" />
+                                <ValidationMessage For="(()=>personaActual.Telefono)" class="text-danger"></ValidationMessage>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group col-6">
+                            <label>Dirección:</label>
+                            <InputText @bind-Value="personaActual.Direccion" class="form-control" />
+                            <ValidationMessage For="(()=>personaActual.Direccion)" class="text-danger"></ValidationMessage>
+                        </div>
+
+
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Editar</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button" @onclick="Close">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+}
+
+@code {
+    private bool Display = false;
+
+    [Parameter]
+    public EventCallback RefrescarEvent { get; set; }
+
+    public PersonaDto personaActual { get; set; } = new PersonaDto();
+    public int idEmpresa { get; set; }
+
+    private void RefrescarRepresentante()
+    {
+        RefrescarEvent.InvokeAsync();
+
+    }
+
+    public void EditarPersona()
+    {
+        personaService.ActualizarPersona(personaActual,idEmpresa);
+        Close();
+        RefrescarRepresentante();
+    }
+
+
+    public void Mostrar()
+    {
+        this.Display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Close()
+    {
+        this.Display = false;
+        StateHasChanged();
+
+    }
+
+
+}
+

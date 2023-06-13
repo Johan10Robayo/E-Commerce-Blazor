@@ -1,0 +1,57 @@
+﻿@inject PersonaService personaService
+@if (display)
+{
+    <div class="container mt-5 mb-5">
+        <h3>Lista de Empleados</h3>
+        <div class="row">
+            <div class="col-2">
+                <label>Nit de la empresa: </label>
+            </div>
+            <div class="col-3">
+                <InputNumber @bind-Value="idEmpresaActual" class="form-control" />
+            </div>
+            <div class="col-2">
+                <button @onclick="Buscar" class="btn btn-success">Buscar</button>
+            </div>
+        </div>
+
+
+    </div>
+
+    @if (empleados.Count >0 && empleados != null)
+    {
+        <TableComponent Items="empleados" CssClass="table-striped"
+                        ColumnsToExcludeCSV="nada"></TableComponent>
+    
+    }
+
+}
+
+@code {
+    private bool display = false;
+    private int idEmpresaActual;
+    private List<PersonaDto> empleados = new List<PersonaDto>();
+
+    public void Mostrar()
+    {
+        this.display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Dispose()
+    {
+        this.display = false;
+
+        StateHasChanged();
+
+    }
+
+    private void Buscar()
+    {
+        empleados = personaService.ObtenerEmpleadosDeEmpresa(idEmpresaActual);
+
+    
+    }
+}

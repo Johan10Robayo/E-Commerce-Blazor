@@ -1,0 +1,62 @@
+﻿
+@if (Display)
+{
+    <div class="modal is-active">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Confirmación</p>
+                <button class="delete" aria-label="close"
+                    @onclick="Dispose"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="container">
+                    ¿Estas seguro de eliminar este detalle?
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="btn btn-success mr-5" @onclick="EliminarDetalle">Si</button>
+                <button class="btn btn-danger" @onclick="Dispose">Cancelar</button>
+
+            </footer>
+        </div>
+    </div>
+
+
+}
+
+
+@code {
+    private bool Display = false;
+    public ProductoDetalleDto ProdutoAEliminar { get; set; }
+
+    public string Mensaje { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback EventoProducto { get; set; }
+
+
+    private void EliminarDetalle()
+    {
+
+        EventoProducto.InvokeAsync();
+        Dispose();
+
+    }
+
+
+    public void Mostrar()
+    {
+        this.Display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Dispose()
+    {
+        this.Display = false;
+        StateHasChanged();
+
+    }
+}

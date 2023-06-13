@@ -1,0 +1,102 @@
+﻿
+
+<FormComponent></FormComponent>
+
+
+
+<div class="row mt-5 mb-5">
+    <div class="col-2 p-0">
+        <a class="page-link" @onclick="(()=>{Evento(PRODUCTOS);})">Productos</a>
+    </div>
+    <div class="col-2 p-0">
+        <a class="page-link" @onclick="(()=>{Evento(REPRESENTANTE);})">Representante</a>
+    </div>
+    <div class="col-2 p-0">
+        <a class="page-link" @onclick="(()=>{Evento(EMPLEADOS);})">Empleados</a>
+    </div>
+    <div class="col-2 p-0">
+        <a class="page-link" @onclick="(()=>{Evento(DETALLE_VENTA);})">Detalle de la venta</a>
+    </div>
+</div>
+
+
+
+<ProductoComponent @ref="productoComponent"></ProductoComponent>
+<RepresentanteComponent @ref="representanteComponent"></RepresentanteComponent>
+<EmpleadosComponent @ref="empleadosComponent"></EmpleadosComponent>
+<DetalleVenta @ref="detalleVenta"></DetalleVenta>
+
+
+
+
+
+@code {
+    private string componenteActual = "Ninguno";
+    private ProductoComponent productoComponent;
+    private RepresentanteComponent representanteComponent;
+    private EmpleadosComponent empleadosComponent;
+    private DetalleVenta detalleVenta;
+
+
+    private void Evento(string siguiente)
+    {
+        DisposeComponente();
+        componenteActual = siguiente;
+        MostrarComponente();
+
+
+    }
+
+
+    private void MostrarComponente()
+    {
+        switch (componenteActual)
+        {
+            case "Productos":
+                productoComponent.Mostrar();
+                break;
+            case "Representante":
+                representanteComponent.Mostrar();
+                break;
+            case "Empleados":
+                empleadosComponent.Mostrar();
+                break;
+            case "DetalleVenta":
+                detalleVenta.Mostrar();
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    private void DisposeComponente()
+    {
+        switch (componenteActual)
+        {
+            case "Productos":
+                productoComponent.Dispose();
+                break;
+            case "Representante":
+                representanteComponent.Dispose();
+                break;
+            case "Empleados":
+                empleadosComponent.Dispose();
+                break;
+            case "DetalleVenta":
+                detalleVenta.Dispose();
+                break;
+            default:
+                break;
+        }
+
+
+    }
+
+    private const  string PRODUCTOS = "Productos";
+    private const string REPRESENTANTE = "Representante";
+    private const string EMPLEADOS = "Empleados";
+    private const string DETALLE_VENTA = "DetalleVenta";
+
+
+}

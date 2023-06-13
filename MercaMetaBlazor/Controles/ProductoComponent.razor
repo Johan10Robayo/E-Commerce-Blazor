@@ -1,0 +1,154 @@
+﻿@inject ProductoService productoService
+
+@if (display)
+{
+    <div class="container mt-5">
+        <h3>Lista de productos</h3>
+        <div class="row">
+            <div class="col-2">
+                <label>Nit de la empresa: </label>
+            </div>
+            <div class="col-3">
+                <InputNumber @bind-Value="idEmpresaActual" class="form-control" />
+            </div>
+            <div class="col-2">
+                <button @onclick="Buscar" class="btn btn-success">Buscar</button>
+            </div>
+        </div>
+        
+        
+    </div>
+
+    <div class="container mt-5">
+        @if (productos != null)
+        {
+            <div class="row justify-content-evenly gy-5 mt-5">
+                @foreach (var producto in productos)
+                {
+
+                    <div class="col-md-5 col-lg-5">
+                        <img src="@producto.UrlImagen" class="card-img-top" alt="Poster">
+                        <div class="card-body">
+
+                            <h5 class="card-title">@producto.Nombre</h5>
+
+                            <p class="has-text-justified"><b>Código:</b> @producto.Codigo</p>
+                            <p class="has-text-justified"><b>Descripción:</b> @producto.Descripcion</p>
+
+                            <div class="row">
+                                <p class="card-text col-6"><b>Precio:</b> @producto.Precio</p>
+                                <p class="card-text col-6"><b>Cantidad:</b> @producto.Cantidad</p>
+                            </div>
+
+
+                            <p class="card-text"><b>Unidad de medida:</b> @producto.UnidadMedida</p>
+                             
+
+                            <a class="btn btn-info" @onclick="(()=>{MostrarModalEditar(producto);})">Editar</a>
+                            <a class="btn btn-danger" @onclick="(()=>{MostrarModalEliminiar(producto);})">Eliminar</a>
+
+                        </div>
+                    </div>
+
+                }
+            </div>
+        
+        
+        }
+
+
+    </div>
+    
+
+}
+
+<ModalEditarProducto @ref="modalEditarProducto" RefrescarEvent="Refrescar" ConfirmacionEvent="ConfirmacionEditarProducto" />
+<ModalEliminarProducto @ref="modalEliminarProducto" RefrescarEvent="Refrescar"  ConfirmarEvent="ConfirmacionEliminarProducto"></ModalEliminarProducto>
+<ModalConfirmacion @ref ="modalConfirmacion"></ModalConfirmacion>
+
+@code {
+    private bool display = false;
+    private int idEmpresaActual;
+    private List<ProductoDto> productos = new List<ProductoDto>();
+    private ModalEditarProducto modalEditarProducto;
+    private ModalEliminarProducto modalEliminarProducto;
+    private ModalConfirmacion modalConfirmacion;
+
+    public void Mostrar()
+    {
+        this.display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Dispose()
+    {
+        this.display = false;
+
+        StateHasChanged();
+
+    }
+
+    private void Buscar()
+    {
+
+        productos = productoService.ObtenerProductosPorEmpresa(idEmpresaActual);
+
+    }
+
+    private void MostrarModalEditar(ProductoDto producto)
+    {
+
+        modalEditarProducto.productoActual = producto;
+        modalEditarProducto.Mostrar();
+
+    }
+
+    private void MostrarModalEliminiar(ProductoDto producto)
+    {
+
+        modalEliminarProducto.IdProductoAEliminar = producto.Codigo;
+        modalEliminarProducto.Mostrar();
+
+    }
+
+    private void ConfirmacionEditarProducto()
+    {
+        if (modalEditarProducto.Resultado == 1)
+        {
+            modalConfirmacion.Mensaje = "Se ha editado el producto";
+
+        }
+        else
+        {
+            modalConfirmacion.Mensaje = "No se ha editado el producto";
+
+        }
+        modalConfirmacion.Mostrar();
+
+    }
+
+    private void ConfirmacionEliminarProducto()
+    {
+        if (modalEliminarProducto.Resultado == 1)
+        {
+            modalConfirmacion.Mensaje = "Se ha eliminado el producto";
+
+        }
+        else
+        {
+            modalConfirmacion.Mensaje = "No se ha eliminado el producto";
+
+        }
+        modalConfirmacion.Mostrar();
+
+    }
+
+
+    private void Refrescar()
+    {
+
+        Mostrar();
+    }
+}

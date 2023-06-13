@@ -1,0 +1,88 @@
+﻿@inject PersonaService personaService
+
+@if (display)
+{
+    <div class="container mt-5 mb-5">
+        <h3>Representante Legal</h3>
+        <div class="row">
+            <div class="col-2">
+                <label>Nit de la empresa: </label>
+            </div>
+            <div class="col-3">
+                <InputNumber @bind-Value="idEmpresaActual" class="form-control" />
+            </div>
+            <div class="col-2">
+                <button @onclick="Buscar" class="btn btn-success">Buscar</button>
+            </div>
+        </div>
+
+
+    </div>
+
+    @if (representante != null)
+    {
+        <div class="card container mt-5 mb-5" style="width: 25rem;">
+            <div class="card-body">
+                <h5 class="card-title text-center">Representante Legal</h5>            
+                <p class="card-text"><b>Identificación: </b>@representante.Id</p>
+                <p class="card-text"><b>Nombre: </b>@representante.Nombre</p>
+                <p class="card-text"><b>Apellido: </b>@representante.Apellido</p>
+                <p class="card-text"><b>Dirección: </b>@representante.Direccion</p>
+                <p class="card-text"><b>Teléfono: </b>@representante.Telefono</p>
+
+                <a class="btn btn-info" @onclick="MostrarModalEditar">Editar</a>
+                
+            </div>
+         </div>
+    
+    }
+
+    <ModalEditarRepresentante @ref="modalEditarRepresentante" RefrescarEvent="Refrescar"></ModalEditarRepresentante>
+
+
+}
+
+@code {
+    private bool display = false;
+    private int idEmpresaActual;
+    private ModalEditarRepresentante modalEditarRepresentante;
+
+    private PersonaDto representante;
+
+    public void Mostrar()
+    {
+        this.display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Dispose()
+    {
+        this.display = false;
+
+        StateHasChanged();
+
+    }
+
+
+    private void Buscar()
+    {
+        representante = personaService.ObenerRepresentanteDeEmpresa(idEmpresaActual);
+
+    }
+
+    private void MostrarModalEditar()
+    {
+        modalEditarRepresentante.Mostrar();
+        modalEditarRepresentante.idEmpresa = idEmpresaActual;
+        modalEditarRepresentante.personaActual = representante;
+
+    }
+
+    private void Refrescar()
+    {
+
+        Mostrar();
+    }
+}

@@ -1,0 +1,233 @@
+﻿@inject ProductoService productoService
+@inject IJSRuntime JSRuntime
+
+@if (display)
+{
+    <Header></Header>
+    <h3>Detalle de la venta</h3>
+    <table class="table mb-5" border="1">
+        <thead>
+            <tr>
+                <th>
+                   Num.
+                </th>
+
+                @foreach (var elemento in elementosCabecera)
+                {
+                    <th>
+                        @elemento
+                    </th>
+                }
+
+            </tr>
+        </thead>
+
+        <tbody>
+            @for (int i=0; i< productos.Count; i++)
+            {
+                var currentIndex = i;
+                <tr>
+                    <td >
+                        @(i + 1)
+                    </td>
+                    <td>
+
+                        <InputText @bind-Value="productos[currentIndex].Codigo" @onkeydown="((e)=>BuscarProducto(e,currentIndex))" class="input-vu"></InputText>
+                    </td>
+
+                    <td>
+                        @productos[i].Nombre
+                    </td>
+                    <td>
+                        $&nbsp;<InputNumber @bind-Value="productos[currentIndex].ValorUnitario" @onblur="()=>CalcularTotal(currentIndex)"  class="input-vu"></InputNumber>
+                    </td>
+                    <td>
+                        @productos[i].UnidadMedida
+                    </td>
+                    <td>
+                        <InputNumber @bind-Value="productos[currentIndex].CantidadSolicitada" @onblur="()=>CalcularTotal(currentIndex)" class="input-d"></InputNumber>
+                    </td>
+
+                    <td>
+                        @productos[i].Total.ToString("C")
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+    <div class="contenedor-detalles">
+        <div class="contenedor-detalle mr-3">
+            <label class="label-valor">Valor(1)</label>
+            <label class="valor ml-1">$168.388,00</label>
+            <label class="label-valor ml-3">Valor(2)</label>
+            <label class="valor ml-1">$193.222,00</label>
+            <label class="label-valor ml-3">Valor(3)</label>
+            <label class="valor ml-1">$210.932,00</label>
+        </div>
+
+        <div class="contenedor-detalle">
+            <label class="label-disponible">Disponible</label>
+            <label class="label-valor">Bodega</label>
+            <label class="valor-d ml-1">1</label>
+            <label class="label-valor ml-3">Almacen</label>
+            <label class="valor-d ml-1">1</label>
+            <label class="label-valor ml-3">Total</label>
+            <label class="valor-d ml-1">2</label>
+        </div>
+
+    </div>
+
+    <div class="contenedor-detalle mt-3 mb-5 pb-5">
+        <label class="cop">COP$</label>
+        <label class="label-valor mr-2">SUBTOTAL</label>
+        <label class="valor-t mr-2">@subtotal.ToString("C")</label>
+        <label class="label-valor mr-2">IVA</label>
+        <label class="valor-t mr-2">@iva.ToString("C")</label>
+        <label class="label-valor mr-2">TOTAL</label>
+        <label class="valor-t mr-2">@total.ToString("C")</label>
+        <label class="marca-valor ml-6">W R L C U X X*</label>
+    </div>
+   
+    <ModalBuscarProducto EventoProducto="CargarProducto" @ref="modalBuscarProducto"></ModalBuscarProducto>
+    <ModalEliminarDetalle EventoProducto="EliminarDetalle" @ref="modalEliminarDetalle"></ModalEliminarDetalle>
+    
+}
+
+
+
+@code {
+    private bool display = false;
+    private int numeroProductos = 0;
+    private double subtotal=0;
+    private double iva = 0;
+    private double total = 0;
+    private ModalBuscarProducto modalBuscarProducto;
+    private ModalEliminarDetalle modalEliminarDetalle;
+
+    private List<string> elementosCabecera = new List<string>{
+    "Código","Nombre","Valor Unitario","Unidad de medida","Cantidad Solicitada","Total"
+    };
+
+    private List<ProductoDetalleDto> productos = new List<ProductoDetalleDto> { new ProductoDetalleDto() };
+
+
+    public void CargarProducto()
+    {
+        int indice = modalBuscarProducto.IndiceListaProductos;
+        var productoEncontrado = modalBuscarProducto.productoActual;
+        productos[indice].Codigo = productoEncontrado.Codigo;
+        productos[indice].Nombre = productoEncontrado.Nombre;
+        productos[indice].ValorUnitario = productoEncontrado.Precio;
+        productos[indice].UnidadMedida = productoEncontrado.UnidadMedida;
+
+
+        if (productoEncontrado.Codigo != null && indice == productos.Count - 1)
+        {
+            AgregarFila();
+
+        }
+
+        modalBuscarProducto.productoActual = new ProductoDto();
+
+        CalcularTotal(indice);
+
+
+    }
+
+    public async Task BuscarProducto(KeyboardEventArgs e, int indice)
+    {
+        var code = e.Code;
+        var tecla = e.Key;
+
+        switch (tecla)
+        {
+            case "Unidentified":
+                modalBuscarProducto.IndiceListaProductos = indice;
+                modalBuscarProducto.Mostrar();
+                break;
+            case "Tab":
+                modalEliminarDetalle.ProdutoAEliminar = productos[indice];
+                modalEliminarDetalle.Mostrar();
+                break;
+
+
+
+        }
+
+
+    }
+
+
+
+    private void EliminarDetalle()
+    {
+        var producto = modalEliminarDetalle.ProdutoAEliminar;
+        EliminarFila(producto);
+
+    }
+
+    private void AgregarFila()
+    {
+
+        productos.Add(new ProductoDetalleDto());
+        
+
+    }
+
+    private void EliminarFila(ProductoDetalleDto producto)
+    {
+
+        productos.Remove(producto);
+        CalcularTotales();
+
+    }
+
+    private void CalcularTotal(int index)
+    {
+        productos[index].Total = productos[index].CantidadSolicitada * productos[index].ValorUnitario;
+        CalcularTotales();
+
+
+    }
+
+    private void CalcularTotales()
+    {
+        int tamaño = productos.Count;
+        subtotal = 0;
+        iva = 0;
+
+        for (int i = 0; i < tamaño; i++)
+        {
+            subtotal += productos[i].Total;
+            iva += productos[i].Total * PROCENTAJE_IVA;
+
+        }
+
+        total = subtotal + iva;
+
+    }
+
+
+    public void Mostrar()
+    {
+        this.display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Dispose()
+    {
+        this.display = false;
+
+        StateHasChanged();
+
+    }
+
+    private const string FORMATO_C = "C";
+    private const double PROCENTAJE_IVA = 0.05;
+}

@@ -1,0 +1,104 @@
+﻿@inject ProductoService productoService
+
+@if (Display)
+{
+    <div class="modal is-active">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Editar Producto</p>
+                <button class="delete" aria-label="close"
+                    @onclick="Close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="container">
+                    <div class="container">
+                        
+                        <div class="form-group">
+                            <label>Codigo:</label>
+                            <InputText @bind-Value="productoActual.Codigo" class="form-control" @onblur="BuscarProducto"/>               
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <label>Nombre:</label>
+                                <InputText @bind-Value="productoActual.Nombre" class="form-control" disable />                  
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Precio:</label>
+                                <InputNumber @bind-Value="productoActual.Precio" class="form-control" disable />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <label>Unidad de Medida:</label>
+                                <InputText @bind-Value="productoActual.UnidadMedida" class="form-control" disable />
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Cantidad:</label>
+                                <InputNumber @bind-Value="productoActual.Cantidad" class="form-control" disable />
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" @onclick="CargarProducto">Cargar Producto</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button" @onclick="Close">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+}
+
+@code {
+    private bool Display = false;
+    public ProductoDto productoActual { get; set; } = new ProductoDto();
+    public int Resultado { get; set; }
+    public int IndiceListaProductos { get; set; }
+
+    [Parameter]
+    public EventCallback EventoProducto { get; set; }
+
+
+    public void BuscarProducto()
+    {
+        var productoEncontrado = productoService.ObtenerProductoPorCodigo(productoActual.Codigo);
+
+        productoActual = productoEncontrado;
+
+
+    }
+
+    private void CargarProducto()
+    {
+        EventoProducto.InvokeAsync();
+        Close();
+
+    }
+
+
+    public void Mostrar()
+    {
+        this.Display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Close()
+    {
+        this.Display = false;
+        StateHasChanged();
+
+    }
+
+
+}
+

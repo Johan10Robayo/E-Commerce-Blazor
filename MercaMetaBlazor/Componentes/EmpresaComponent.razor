@@ -1,0 +1,79 @@
+﻿@page "/empresas"
+@inject EmpresaService empresaService
+
+
+<h3>Listado de empresas</h3>
+
+<div class="row justify-content-evenly gy-5">
+    @foreach (var empresa in empresas)
+    {
+
+        <div class="col-md-5 col-lg-5">
+            <img src="@empresa.UrlImagen" class="card-img-top" alt="Poster">
+            <div class="card-body">
+
+                <h5 class="card-title">Nombre: @empresa.Nombre</h5>
+                <div class="row">
+                    <p class="card-text col-6">Nit: @empresa.Nit </p>
+                    <p class="card-text col-6" >Teléfono: @empresa.Telefono</p>
+                </div>
+
+                <div class="row">
+                    <p class="card-text">Dirección: @empresa.Direccion</p>
+
+                </div>
+
+                <hr />
+                <h6>Representante</h6>
+                <div class="row">
+                    <p class="card-text col-6">Identificación: @empresa.Representante.Id</p>
+                    <p class="card-text col-6">Nombre: @empresa.Representante.Nombre</p>
+                </div>
+
+                <div class="row">
+                    <p class="card-text col-6">Apellido: @empresa.Representante.Apellido</p>
+                    <p class="card-text col-6">Telefono: @empresa.Representante.Telefono</p>
+                </div>
+                <p class="card-text">Dirección: @empresa.Representante.Direccion</p>
+
+                <a class="btn btn-info">Editar</a>
+                <a class="btn btn-danger" 
+                @onclick="(() => 
+                {
+                    modalEliminar.Show();
+                    
+                
+                })">Eliminar</a>
+
+            </div>
+        </div>
+
+        
+
+    }
+</div>
+
+<EliminarEmpresaComponent @ref="modalEliminar"></EliminarEmpresaComponent>
+
+
+@code {
+    private List<EmpresaDto> empresas;
+    private EliminarEmpresaComponent modalEliminar;
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        empresas = empresaService.ObtenerEmpresas();
+
+    }
+
+    private void PasarId(int idEmpresa)
+    {
+
+        
+    
+    }
+
+}

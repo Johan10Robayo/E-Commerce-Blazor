@@ -1,0 +1,66 @@
+﻿@inject EmpresaService empresaService
+
+@if (Display)
+{
+    <div class="modal is-active">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Eliminar Empresa</p>
+                <button class="delete" aria-label="close"
+                    @onclick="Dispose"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="container">
+                    ¿Estas seguro de eliminar la empresa?
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="btn btn-success mr-5" @onclick="EliminarEmpresa">Si</button>
+                <button class="btn btn-danger" @onclick="Dispose">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+}
+
+@code {
+    private bool Display = false;
+    public int IdEmpresaAEliminar { get; set; }
+    public int Resultado { get; set; }
+
+    [Parameter]
+    public EventCallback ConfirmarEvent { get; set; }
+
+    private void ConfirmarEliminacion()
+    {
+        ConfirmarEvent.InvokeAsync();
+
+    }
+
+    public void EliminarEmpresa()
+    {
+        Resultado = empresaService.EliminarEmpresaAdmin(IdEmpresaAEliminar);
+
+        Dispose();
+        ConfirmarEliminacion();
+
+    }
+
+
+    public void Mostrar()
+    {
+        this.Display = true;
+
+        StateHasChanged();
+
+    }
+
+    public void Dispose()
+    {
+        this.Display = false;
+        StateHasChanged();
+
+    }
+
+}
